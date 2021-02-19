@@ -16,14 +16,14 @@ class Movie extends Component {
   }
   
   componentDidMount(){
-    axios.get(`http://localhost:1994/autocomplete` )
+    axios.get(process.env.REACT_APP_API + "autocomplete" )
       .then(res => {
         this.setState({ autocompleteInput: res.data.results });
       })
   }
 
   getRecommandations(movie){
-    axios.get("http://localhost:1994/movie/" + movie)
+    axios.get(process.env.REACT_APP_API + "movie/" + movie)
     .then(res => {
       this.setState({recommandations: res.data.results,
                      summary: res.data.summary});

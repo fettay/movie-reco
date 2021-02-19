@@ -17,7 +17,7 @@ class Ip extends Component {
   
 
   getRecommandations(){
-    axios.post("http://localhost:1994/ip", {ip: this.curContent})
+    axios.post(process.env.REACT_APP_API + "ip", {ip: this.curContent})
     .then(res => {
       this.setState({recommandations: res.data.results});
       console.log(res.data.results);

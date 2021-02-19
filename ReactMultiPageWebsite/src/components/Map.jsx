@@ -18,11 +18,11 @@ class Map extends Component {
   }
   
   componentDidMount(){
-    axios.get(`http://localhost:1994/map` )
+    axios.get(process.env.REACT_APP_API + "map")
       .then(res => {
         this.setState({x: res.data.x, y: res.data.y, hover: res.data.hover});
       });
-      axios.get(`http://localhost:1994/autocomplete` )
+      axios.get(process.env.REACT_APP_API + "autocomplete")
       .then(res => {
         this.setState({ autocompleteInput: res.data.results });
       });

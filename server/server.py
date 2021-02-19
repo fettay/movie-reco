@@ -12,14 +12,18 @@ import pickle
 app = Flask(__name__)
 MODEL_PATH = "models/summary_and_plots"
 DATASET_PATH = "models/dataset_new.csv"
-CACHE_PATH_EMBEDDINGS = "models/cache/embeddings.pkl"
-CACHE_PATH_MAP = "models/cache/maps.pkl"
+CACHE_DIR = "models/cache/"
+CACHE_PATH_EMBEDDINGS = CACHE_DIR + "embeddings.pkl"
+CACHE_PATH_MAP = CACHE_DIR + "maps.pkl"
 CORS(app)
 
 
 dataset = pd.read_csv(DATASET_PATH)
 sentence_transformer = SentenceTransformer(MODEL_PATH, device='cpu')
 recommander = SimilarityRecommander(dataset, sentence_transformer=sentence_transformer)
+
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
 
 if os.path.exists(CACHE_PATH_EMBEDDINGS):
     with open(CACHE_PATH_EMBEDDINGS, "rb") as f:
