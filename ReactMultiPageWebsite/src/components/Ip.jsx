@@ -2,6 +2,8 @@ import React, {Component} from "react";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import axios from 'axios';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 
 
 class Ip extends Component {
@@ -13,15 +15,21 @@ class Ip extends Component {
       movieReco: ""
     };
     this.curContent = "";
+    this.recoType = "storyline";
   }
   
 
   getRecommandations(){
-    axios.post(process.env.REACT_APP_API + "ip", {ip: this.curContent})
+    axios.post(process.env.REACT_APP_API + "ip/" + this.recoType, {ip: this.curContent})
     .then(res => {
       this.setState({recommandations: res.data.results});
       console.log(res.data.results);
     });
+  }
+
+  handleTypeChange(event, newValue){
+    this.recoType = newValue;
+    this.getRecommandations();
   }
 
   render(){
@@ -35,6 +43,25 @@ class Ip extends Component {
     return (
       <div className="home">
         <div class="container">
+        <div class="row align-items-center my-5">
+            <div class="col-lg-7">
+            <ToggleButtonGroup
+              value={this.recoType}
+              exclusive
+              onChange={this.handleTypeChange.bind(this)}
+              aria-label="text alignment">
+              <ToggleButton value="tagline" aria-label="tagline">
+                Tagline
+              </ToggleButton>
+              <ToggleButton value="storyline" aria-label="storyline">
+                Storyline
+              </ToggleButton>
+              <ToggleButton value="synopsis" aria-label="synopsis">
+                Synopsis
+              </ToggleButton>
+            </ToggleButtonGroup>
+            </div>
+          </div>
           <div class="row align-items-center my-5">
             <div class="col-lg-7">
             <TextField fullWidth 
