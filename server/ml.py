@@ -45,7 +45,14 @@ class SimilarityRecommander():
 
     def get_summary(self, movie_str):
         index = self.movies_map[movie_str]
-        return self.df.loc[index]['summary']
+        return self.df.loc[index]['plot_summary']
+
+    def get_tags(self, movie_str):
+        index = self.movies_map[movie_str]
+        tags = self.df.loc[index]['tags']
+        tags = tags.split("|")
+        tags = [t for t in tags if not t[0].isupper()]
+        return tags
         
     def query_movie(self, movie_str):
         index = self.movies_map[movie_str]

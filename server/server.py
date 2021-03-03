@@ -60,7 +60,8 @@ def get_completion(text):
 @app.route('/movie/<string:movie>')
 def get_movie_reco(movie):
     movies = recommander.query_movie(movie)
-    return jsonify({'results': movies, 'summary': recommander.get_summary(movie)})
+    return jsonify({'results': movies, 'summary': recommander.get_summary(movie),
+                    'tags': recommander.get_tags(movie)})
 
 
 @app.route('/ip', methods=['POST'])
