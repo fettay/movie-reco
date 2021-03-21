@@ -10,7 +10,7 @@ import pickle
 
 
 app = Flask(__name__)
-MODEL_PATH = {'tagline': "models/tagline", 'storyline': "models/plot_summary", "synopsis": "models/synopsis"}
+MODEL_PATH = {'tagline': "distilbert-base-nli-stsb-mean-tokens", 'storyline': "distilbert-base-nli-stsb-mean-tokens", "synopsis": "models/synopsis"}
 DATASET_PATH = "models/dataset_new.csv"
 CACHE_DIR = "models/cache/"
 CACHE_PATH_EMBEDDINGS = CACHE_DIR + "embeddings.pkl"

@@ -8,7 +8,7 @@ import regex as re
 
 class SimilarityRecommander():
     
-    def __init__(self, dataset, field, embeddings=None, sentence_transformer=None, min_votes=300):
+    def __init__(self, dataset, field, embeddings=None, sentence_transformer=None, min_votes=0):
         self.df = dataset[dataset['vote_count'] > min_votes].copy().reset_index(drop=True)
         self.movies_map = {row['title']: i for i, row in self.df.iterrows()}
         self.embeddings = embeddings
