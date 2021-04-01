@@ -1,7 +1,8 @@
 from flask import Flask
 from sentence_transformers import SentenceTransformer
 import pandas as pd
-from ml import SimilarityRecommander
+from ml.sentence_recommander import SimilarityRecommander
+from ml.themes import ThemeRecommander
 from flask import jsonify, request
 from sklearn.manifold import TSNE
 from flask_cors import CORS
@@ -16,8 +17,10 @@ CACHE_DIR = "models/cache/"
 CACHE_PATH_EMBEDDINGS = CACHE_DIR + "embeddings.pkl"
 CACHE_PATH_MAP = CACHE_DIR + "maps.pkl"
 DEFAULT_RECOMMANDER = "storyline"
-CORS(app)
 
+THEMES_DATA = {'tokenizer_path': "distilbert-base-uncased",
+               "model_path": "models/themes"}
+CORS(app)
 
 dataset = pd.read_csv(DATASET_PATH)
 recommanders = {'tagline' : SimilarityRecommander(dataset, "tagline_clean",
@@ -27,6 +30,7 @@ recommanders = {'tagline' : SimilarityRecommander(dataset, "tagline_clean",
                 'synopsis': SimilarityRecommander(dataset, "synopsis_clean",
                  sentence_transformer=SentenceTransformer(MODEL_PATH['synopsis'], device='cpu'))}
 
+themes_recommander = ThemeRecommander(**THEMES_DATA)
 
 if not os.path.exists(CACHE_DIR):
     os.makedirs(CACHE_DIR)
@@ -78,6 +82,13 @@ def get_ip_reco(recommander_name):
     ip = request.json.get("ip")
     movies = recommanders[recommander_name].from_ip(ip)
     return jsonify({'results': movies})
+
+
+@app.route('/themes', methods=['POST'])
+def get_themes_reco():
+    ip = request.json.get("ip")
+    themes = themes_recommander.get_themes(ip)
+    return jsonify({'results': themes})
 
 
 @app.route('/map')

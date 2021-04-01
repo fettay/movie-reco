@@ -12,14 +12,22 @@ class Ip extends Component {
     this.state = {
       autocompleteInput: [],
       recommandations: [],
-      movieReco: ""
+      movieReco: "",
+      tags: []
     };
     this.curContent = "";
     this.recoType = "storyline";
   }
   
 
-  getRecommandations(){
+
+  getAllRecommandations(){
+    axios.post(process.env.REACT_APP_API + "themes", {ip: this.curContent})
+    .then(res => {
+      this.setState({tags: res.data.results});
+      console.log(res.data.results);
+    });
+
     axios.post(process.env.REACT_APP_API + "ip/" + this.recoType, {ip: this.curContent})
     .then(res => {
       this.setState({recommandations: res.data.results});
@@ -29,7 +37,7 @@ class Ip extends Component {
 
   handleTypeChange(event, newValue){
     this.recoType = newValue;
-    this.getRecommandations();
+    this.getAllRecommandations();
   }
 
   render(){
@@ -38,6 +46,11 @@ class Ip extends Component {
 
     this.state.recommandations.forEach(movie => {
       movies.push(<li>{movie}</li>);
+    });
+
+    var tags = [];
+    this.state.tags.forEach(tag => {
+      tags.push(<span class="badge badge-pill badge-primary tags">{tag}</span>)
     });
 
     return (
@@ -61,6 +74,9 @@ class Ip extends Component {
               </ToggleButton>
             </ToggleButtonGroup>
             </div>
+            <div class="row tags-container">
+                {tags}
+            </div>
           </div>
           <div class="row align-items-center my-5">
             <div class="col-lg-7">
@@ -72,7 +88,7 @@ class Ip extends Component {
             onChange={(val) => this.curContent = val.target.value}
             variant="outlined"
             />
-            <Button variant="contained" color="primary" onClick={() => this.getRecommandations()}>
+            <Button variant="contained" color="primary" onClick={() => this.getAllRecommandations()}>
               Validate
             </Button>
             </div>
