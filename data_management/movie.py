@@ -49,8 +49,8 @@ class Movie:
 
     @staticmethod
     def load_from_mongodb(imdbID: str) -> 'Movie':
-        client = MongoClient("mongodb://{user}:{password}@{url}/".format(user=os.environ['MONGODB_USER'], \
-            password=os.environ['MONGODB_PASSWORD'], url=DB_URL))
+        client = MongoClient(get_connection_url(os.environ['MONGODB_USER'], \
+                                            os.environ['MONGODB_PASSWORD'], DB_URL))
         db = client[DB_NAME][DB_COLLECTION]    
         mongo_movie = db.find_one({'imdbID': imdbID})
         if not mongo_movie:
@@ -65,7 +65,7 @@ class Movie:
 
 def enrich_and_upload_to_mongo(imdbIDs: list):
     client = MongoClient(get_connection_url(os.environ['MONGODB_USER'], \
-                                            os.environ['MONGODB_PASSWORD'], "mongo.fettay.com"))
+                                            os.environ['MONGODB_PASSWORD'], DB_URL))
     db = client[DB_NAME][DB_COLLECTION]
     logging.info("connected to mongo DB")
     for imdbID in imdbIDs:
