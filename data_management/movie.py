@@ -32,7 +32,7 @@ class Movie:
         imdb_movie = ia.get_movie(imdbID)
         if len(imdb_movie) == 0:
             logging.warning('no movie with id={} in imdb'.format(imdbID))
-            my_movie = Movie('')
+            my_movie = None
         else:
             my_movie = Movie(imdbID)
             for key in vars(my_movie):
@@ -55,7 +55,7 @@ class Movie:
         mongo_movie = db.find_one({'imdbID': imdbID})
         if not mongo_movie:
             logging.warning('no movie with id={} in mongo DB'.format(imdbID))
-            my_movie = Movie('')
+            my_movie = None
         else:
             my_movie = Movie(imdbID)
             for key in vars(my_movie):
