@@ -2,11 +2,9 @@ import logging
 import os
 from imdb import IMDb
 from pymongo import MongoClient
-
-
-DB_URL = "mongo.fettay.com"
-DB_NAME = 'recommander'
-DB_COLLECTION = 'movies'
+from multiprocessing import Pool
+from constants import DB_URL, DB_NAME, DB_COLLECTION
+from mongo_utils import get_connection_url
 
 
 class Movie:
@@ -22,42 +20,56 @@ class Movie:
         self.tagline = tagline
 
 
-    def load_from_imdb(self):
+    def upload_to_mongo(self, db_connection, overwrite=True):
+        db_connection.update_one({'imdbID': self.imdbID}, {'$set': vars(self)}, overwrite)
+        logging.info("id movie {} saved to mongo DB".format(self.imdbID))
+        return 0
+
+
+    @staticmethod
+    def load_from_imdb(imdbID: str) -> 'Movie':
         ia = IMDb()
-        imdb_movie = ia.get_movie(self.imdbID)
+        imdb_movie = ia.get_movie(imdbID)
         if len(imdb_movie) == 0:
-            logging.warning('no movie with id={} in imdb'.format(self.imdbID))
+            logging.warning('no movie with id={} in imdb'.format(imdbID))
+            my_movie = Movie('')
         else:
-            for key in vars(self):
-                setattr(self, key, imdb_movie.data.get(key))
-            setattr(self, 'keywords', ia.get_movie_keywords(self.imdbID)['data'].get('keywords'))
-            if len(self.plot) > 0:
+            my_movie = Movie(imdbID)
+            for key in vars(my_movie):
+                setattr(my_movie, key, imdb_movie.data.get(key))
+            setattr(my_movie, 'keywords', ia.get_movie_keywords(imdbID)['data'].get('keywords'))
+            if my_movie.plot:
                 # alternative to argmin builtin function
-                summary_lengths = [len(x) for x in self.plot] 
+                summary_lengths = [len(x) for x in my_movie.plot] 
                 f = lambda i: summary_lengths[i]
                 smaller = min(range(len(summary_lengths)), key=f)
-                self.tagline = self.plot[smaller] 
-
+                my_movie.tagline = my_movie.plot[smaller] 
+        return my_movie
     
-    def load_from_mongodb(self):
+
+    @staticmethod
+    def load_from_mongodb(imdbID: str) -> 'Movie':
         client = MongoClient("mongodb://{user}:{password}@{url}/".format(user=os.environ['MONGODB_USER'], \
             password=os.environ['MONGODB_PASSWORD'], url=DB_URL))
         db = client[DB_NAME][DB_COLLECTION]    
-        mongo_movie = db.find_one({'imdbID': self.imdbID})
+        mongo_movie = db.find_one({'imdbID': imdbID})
         if not mongo_movie:
-            logging.warning('no movie with id={} in mongo DB'.format(self.imdbID))
+            logging.warning('no movie with id={} in mongo DB'.format(imdbID))
+            my_movie = Movie('')
         else:
-            for key in vars(self):
-                setattr(self, key, mongo_movie.get(key))
+            my_movie = Movie(imdbID)
+            for key in vars(my_movie):
+                setattr(my_movie, key, mongo_movie.get(key))
+        return my_movie
 
 
-my_movie = Movie('0054013')
-my_movie.load_from_imdb()
-temp = vars(my_movie)
-for item in temp:
-    print(item, ':', temp[item])
-print("\n\n") 
-my_movie.load_from_mongodb()
-for item in temp:
-    print(item, ':', temp[item])
+def enrich_and_upload_to_mongo(imdbIDs: list):
+    client = MongoClient(get_connection_url(os.environ['MONGODB_USER'], \
+                                            os.environ['MONGODB_PASSWORD'], "mongo.fettay.com"))
+    db = client[DB_NAME][DB_COLLECTION]
+    logging.info("connected to mongo DB")
+    for imdbID in imdbIDs:
+        my_movie = Movie.load_from_imdb(imdbID)
+        my_movie.upload_to_mongo(db)
+    return 0
 
