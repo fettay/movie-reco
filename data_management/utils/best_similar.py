@@ -8,25 +8,36 @@ import logging
 
 import numpy as np
 import pymongo
+from retry import retry
+
+from data_management.utils.proxies import get_random_proxy
 
 
 AUTOCOMPLETE_URL = "https://bestsimilar.com/site/autocomplete?term={movie_str}"
 MOVIE_PAGE_URL = "https://bestsimilar.com{movie_url}"
 HEADERS = {"user-agent": "Chrome/89.0.4389.114"}
 
-def _autocomplete(movie_name):
+
+def _autocomplete(movie_name, proxies):
     
     data = {"term": movie_name}
     url = AUTOCOMPLETE_URL.format(movie_str=movie_name)
-    return requests.post(url, data=data, headers=HEADERS).json()
+    response = requests.post(url, data=data, headers=HEADERS, proxies=proxies)
+    if response.status_code != 200:
+        return {}
+    return response.json()
 
-def _find_link(movie_name):
-    possibles = _autocomplete(movie_name)
+def _find_link(movie_name, proxies):
+    possibles = _autocomplete(movie_name, proxies)
    
     if 'movie' not in possibles:
         return None
     
     values = np.array([-SequenceMatcher(None, m['label'], movie_name).ratio() for m in possibles['movie']])
+    
+    if len(values) == 0:
+        return None
+    
     arg_sorted = np.argsort(values)
     return possibles['movie'][arg_sorted[0]]
 
@@ -50,7 +61,7 @@ def _match_movie_reco_with_ids(collection, movies):
     movies_ids = [collection.find_one({"title": m}) for m in movies]
     return [movie['_id'] for movie in movies_ids if movie is not None]
 
-
+@retry(tries=5)
 def get_movie_data(collection: pymongo.collection.Collection, movie: 'Movie') -> Dict:
     """Retrieve best similar movie data
 
@@ -62,14 +73,15 @@ def get_movie_data(collection: pymongo.collection.Collection, movie: 'Movie') ->
         Dict: ExtraData for the Movie Object
     """
     empty_result = {'best_similar_themes': None, 'best_similar_recos': None}
+    proxies = get_random_proxy()
     
     movie_name = movie.title
-    movie_link = _find_link(movie_name)
+    movie_link = _find_link(movie_name, proxies)
     
     if movie_link is None:
         return empty_result
     
-    response = requests.get(MOVIE_PAGE_URL.format(movie_url=movie_link['url']), headers=HEADERS)
+    response = requests.get(MOVIE_PAGE_URL.format(movie_url=movie_link['url']), headers=HEADERS, proxies=proxies)
 
     if response.status_code != 200:
         return empty_result
@@ -90,4 +102,3 @@ def get_movie_data(collection: pymongo.collection.Collection, movie: 'Movie') ->
     
     recos_ids = _match_movie_reco_with_ids(collection, recos)
     return {'best_similar_themes': themes, 'best_similar_recos': recos_ids}
-    
