@@ -30,5 +30,5 @@ def add_imdb_data(fields):
 
 
 if __name__ == "__main__":
-    add_imdb_data(['year'])
+    # add_imdb_data(['year'])
 
