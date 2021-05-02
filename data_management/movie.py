@@ -10,26 +10,24 @@ from data_management.utils.best_similar import get_movie_data
 
 
 class Movie:
-    def __init__(self, imdbID: str, title: str = '', votes: int = -1, genres: list = [], \
-        plot: list = [], synopsis: str = '', keywords: list = [], tagline: str = '',
-        best_similar_themes: List[str] = None, best_similar_recos: List[ObjectId] = None,
-        **kwargs):
+    
+    def __init__(self, imdbID: str, **kwargs):
         self.imdbID = imdbID
-        self.title = title
-        self.votes = votes
-        self.genres = genres
-        self.plot = plot
-        self.synopsis = synopsis
-        self.keywords = keywords
-        self.tagline = tagline
-        self.best_similar_themes = best_similar_themes
-        self.best_similar_recos = best_similar_recos
 
 
-    def upload_to_mongo(self, db_connection, overwrite=True):
-        db_connection.update_one({'imdbID': self.imdbID}, {'$set': vars(self)}, overwrite)
+    def upload_to_mongo(self, db_connection, upsert=True):
+        db_connection.update_one({'imdbID': self.imdbID}, {'$set': vars(self)}, upsert)
         logging.info("id movie {} saved to mongo DB".format(self.imdbID))
         return 0
+
+
+    def enrich_from_imdb(self, fields):
+        ia = IMDb()
+        imdb_movie = ia.get_movie(self.imdbID)
+        update = {field: imdb_movie.data.get(field) for field in fields}
+        collection = get_collection()
+        collection.update_one({'imdbID': self.imdbID}, {'$set': update})
+
 
     @staticmethod
     def _load_imdb_data(imdbID: str) -> 'Movie':
@@ -51,11 +49,13 @@ class Movie:
                 my_movie.tagline = my_movie.plot[smaller]
         return my_movie
 
+
     def load_best_similar_data(self):
         collection = get_collection()
         results = get_movie_data(collection, self)
         self.best_similar_themes = results.get('best_similar_themes')
         self.best_similar_recos = results.get('best_similar_recos')
+
 
     @staticmethod
     def load_from_imdb_id(imdbID: str) -> 'Movie':
