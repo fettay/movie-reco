@@ -7,6 +7,7 @@ from bson.objectid import ObjectId
 
 from data_management.mongo_utils import get_collection
 from data_management.utils.best_similar import get_movie_data
+from data_management.utils.movie_lens import MovieLensApi
 
 
 class Movie:
@@ -14,12 +15,10 @@ class Movie:
     def __init__(self, imdbID: str, **kwargs):
         self.imdbID = imdbID
 
-
     def upload_to_mongo(self, db_connection, upsert=True):
         db_connection.update_one({'imdbID': self.imdbID}, {'$set': vars(self)}, upsert)
         logging.info("id movie {} saved to mongo DB".format(self.imdbID))
         return 0
-
 
     def enrich_from_imdb(self, fields):
         ia = IMDb()
@@ -49,18 +48,31 @@ class Movie:
                 my_movie.tagline = my_movie.plot[smaller]
         return my_movie
 
-
     def load_best_similar_data(self):
         collection = get_collection()
-        results = get_movie_data(collection, self)
+        try:
+            results = get_movie_data(collection, self)
+        except Exception as e:
+            logging.exception(e)
+            logging.warning("Failed retrieving best similar data for the movie")
+            results = {}
         self.best_similar_themes = results.get('best_similar_themes')
         self.best_similar_recos = results.get('best_similar_recos')
 
+    def load_movie_lens_data(self, movie_lens_api: MovieLensApi):
+        collection = get_collection()
+        try:
+            results = movie_lens_api.run(self.title, get_collection())
+        except Exception:
+            logging.warning("Failed retrieving movielens for the movie")
+            results = {}
+        self.movie_lens_recos = results.get("movie_lens_recos")
 
     @staticmethod
-    def load_from_imdb_id(imdbID: str) -> 'Movie':
+    def load_from_imdb_id(imdbID: str, movie_lens_api: MovieLensApi) -> 'Movie':
         my_movie = Movie._load_imdb_data(imdbID)
         my_movie.load_best_similar_data()
+        my_movie.load_movie_lens_data(movie_lens_api)
         return my_movie
     
 
@@ -81,8 +93,9 @@ class Movie:
 def enrich_and_upload_to_mongo(imdbIDs: list):
     db = get_collection()
     logging.info("connected to mongo DB")
+    mv_api = MovieLensApi("mfettaya@hotmail.com", 'raphiphi')
     for imdbID in imdbIDs:
-        my_movie = Movie.load_from_imdb_id(imdbID)
+        my_movie = Movie.load_from_imdb_id(imdbID, mv_api)
         my_movie.upload_to_mongo(db)
     return 0
 
