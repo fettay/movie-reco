@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 from data_management.mongo_utils import get_collection
 from data_management.utils.best_similar import get_movie_data
 from data_management.utils.movie_lens import MovieLensApi
+from data_management.constants import RELEVANT_KEYS
 
 
 class Movie:
@@ -37,10 +38,11 @@ class Movie:
             my_movie = None
         else:
             my_movie = Movie(imdbID)
-            for key in vars(my_movie):
+            for key in RELEVANT_KEYS:
                 setattr(my_movie, key, imdb_movie.data.get(key))
             setattr(my_movie, 'keywords', ia.get_movie_keywords(imdbID)['data'].get('keywords'))
             if my_movie.plot:
+                my_movie.plot = [text.split('::')[0] for text in my_movie.plot]
                 # alternative to argmin builtin function
                 summary_lengths = [len(x) for x in my_movie.plot] 
                 f = lambda i: summary_lengths[i]

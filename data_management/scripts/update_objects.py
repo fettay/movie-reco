@@ -43,11 +43,4 @@ def add_movie_lens_data():
 
 
 if __name__ == "__main__":
-    # collection = get_collection()
-    # movie = Movie(**collection.find_one({"title": "Toy Story"}))
-    # movie.load_best_similar_data()
-    # print(movie.__dict__)
-    add_best_similar_data()
-    # add_movie_lens_data()
-
-
+    pass
