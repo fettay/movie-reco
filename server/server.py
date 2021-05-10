@@ -3,6 +3,7 @@ from sentence_transformers import SentenceTransformer
 import pandas as pd
 from ml.sentence_recommander import SimilarityRecommander
 from ml.themes import ThemeRecommander
+from ml.tfidf import TfIdf
 from flask import jsonify, request
 from sklearn.manifold import TSNE
 from flask_cors import CORS
@@ -17,6 +18,7 @@ CACHE_DIR = "models/cache/"
 CACHE_PATH_EMBEDDINGS = CACHE_DIR + "embeddings.pkl"
 CACHE_PATH_MAP = CACHE_DIR + "maps.pkl"
 DEFAULT_RECOMMANDER = "storyline"
+TF_IDF_PATH = "models/tfidf/"
 
 THEMES_DATA = {'tokenizer_path': "distilbert-base-uncased",
                "model_path": "models/themes"}
@@ -32,34 +34,35 @@ recommanders = {'tagline' : SimilarityRecommander(dataset, "tagline_clean",
 
 themes_recommander = ThemeRecommander(**THEMES_DATA)
 
-if not os.path.exists(CACHE_DIR):
-    os.makedirs(CACHE_DIR)
+# if not os.path.exists(CACHE_DIR):
+#     os.makedirs(CACHE_DIR)
 
-if os.path.exists(CACHE_PATH_EMBEDDINGS):
-    with open(CACHE_PATH_EMBEDDINGS, "rb") as f:
-        all_embeddings = pickle.load(f)
-        for k in recommanders:
-            recommanders[k].embeddings = all_embeddings[k]
-else:
-    for k in recommanders:
-        recommanders[k].train()
-    with open(CACHE_PATH_EMBEDDINGS, "wb") as f:
-        pickle.dump({k: recommanders[k].embeddings for k in recommanders}, f)
+# if os.path.exists(CACHE_PATH_EMBEDDINGS):
+#     with open(CACHE_PATH_EMBEDDINGS, "rb") as f:
+#         all_embeddings = pickle.load(f)
+#         for k in recommanders:
+#             recommanders[k].embeddings = all_embeddings[k]
+# else:
+#     for k in recommanders:
+#         recommanders[k].train()
+#     with open(CACHE_PATH_EMBEDDINGS, "wb") as f:
+#         pickle.dump({k: recommanders[k].embeddings for k in recommanders}, f)
 
-if os.path.exists(CACHE_PATH_MAP):
-    with open(CACHE_PATH_MAP, "rb") as f:
-        x, hover = pickle.load(f)
-else:
-    tsne = TSNE(n_components=2, metric='cosine')
-    x = tsne.fit_transform(recommanders[DEFAULT_RECOMMANDER].embeddings)
-    hover = recommanders[DEFAULT_RECOMMANDER].df['title'].values
-    with open(CACHE_PATH_MAP, "wb") as f:
-        pickle.dump((x, hover), f)
+# if os.path.exists(CACHE_PATH_MAP):
+#     with open(CACHE_PATH_MAP, "rb") as f:
+#         x, hover = pickle.load(f)
+# else:
+#     tsne = TSNE(n_components=2, metric='cosine')
+#     x = tsne.fit_transform(recommanders[DEFAULT_RECOMMANDER].embeddings)
+#     hover = recommanders[DEFAULT_RECOMMANDER].df['title'].values
+#     with open(CACHE_PATH_MAP, "wb") as f:
+#         pickle.dump((x, hover), f)
 
 
 @app.route('/autocomplete')
 def get_completion_all():
     match = [m for m in recommanders[DEFAULT_RECOMMANDER].movies_map]
+    match = match[:50]
     return jsonify({'results': match})
 
 
@@ -67,6 +70,7 @@ def get_completion_all():
 def get_completion(text):
     text = text.lower()
     match = [m for m in recommanders[DEFAULT_RECOMMANDER].movies_map if text in m.lower()]
+    match = match[:50]
     return jsonify({'results': match})
 
 
@@ -94,6 +98,13 @@ def get_themes_reco():
 @app.route('/map')
 def get_map():
     return jsonify({'x': x[:, 0].tolist(), 'y': x[:, 1].tolist(), 'hover': hover.tolist()})
+
+
+@app.route('/tfidf/<string:text>')
+def return_kneighbors(text):
+    reco = TfIdf(TF_IDF_PATH)
+    match = reco.kneighbors(text)
+    return str(match)
 
 
 if __name__ == "__main__":
