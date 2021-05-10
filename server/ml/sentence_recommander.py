@@ -6,7 +6,7 @@ import spacy
 import regex as re
 
 
-class SimilarityRecommander():
+class SimilarityRecommander:
     
     def __init__(self, dataset, field, embeddings=None, sentence_transformer=None, min_votes=0):
         self.df = dataset[dataset['vote_count'] > min_votes].copy().reset_index(drop=True)
