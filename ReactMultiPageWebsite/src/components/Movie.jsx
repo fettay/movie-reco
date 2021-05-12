@@ -21,10 +21,17 @@ class Movie extends Component {
   }
   
   componentDidMount(){
-    axios.get(process.env.REACT_APP_API + "autocomplete" )
+    axios.get(process.env.REACT_APP_API + "autocomplete")
       .then(res => {
         this.setState({ autocompleteInput: res.data.results });
       })
+  }
+
+  getTitleSuggestions(inputTitle){
+    axios.get(process.env.REACT_APP_API + "autocomplete/" + inputTitle)
+    .then(res => {
+      this.setState({ autocompleteInput: res.data.results })
+    })
   }
 
   getRecommandationsMovie(){
@@ -93,6 +100,7 @@ class Movie extends Component {
                   style={{ width: 300 }}
                   options={this.state.autocompleteInput}
                   onChange={(str) => this.getRecommandations(str.target.textContent)}
+                  onInputChange={(str) => this.getTitleSuggestions(str.target.value)}
                   renderInput={(params) => <TextField {...params} label="Movie" variant="outlined" />}/ >
               </div>
               <div class="row tags-container">
