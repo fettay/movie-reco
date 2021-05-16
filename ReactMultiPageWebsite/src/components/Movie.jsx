@@ -61,7 +61,7 @@ class Movie extends Component {
 
     var movies = [];
 
-    this.state.recommandations.forEach(movie => {
+    this.state.recommandations.slice(0, 25).forEach(movie => {
       movies.push(<li>{movie}</li>);
     });
 

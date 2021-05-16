@@ -27,7 +27,11 @@ class Movie:
         imdb_movie = ia.get_movie(self.imdbID)
         update = {field: imdb_movie.data.get(field) for field in fields}
         collection.update_one({'imdbID': self.imdbID}, {'$set': update})
-
+    
+    def get(self, attr, default_val=None):
+        if hasattr(self, attr):
+            return getattr(self, attr)
+        return default_val
 
     @staticmethod
     def _load_imdb_data(imdbID: str) -> 'Movie':

@@ -1,6 +1,5 @@
 from flask import Flask
 import sys
-sys.path.insert(0, "/home/israel/movie-reco")
 import pandas as pd
 from ml.sentence_recommander import SimilarityRecommander
 from ml.themes import ThemeRecommander
@@ -8,7 +7,6 @@ from ml.tfidf import TfIdf
 from data_management.mongo_utils import movie_from_title, most_popular_titles, get_matching_titles
 from flask import jsonify, request
 from flask_cors import CORS
-import os
 from os.path import expanduser
 
 
@@ -69,5 +67,5 @@ def get_themes_reco():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=2020)
+    app.run(host="0.0.0.0", port=1994)
     print("Running")
