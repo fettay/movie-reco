@@ -1,14 +1,15 @@
 from flask import Flask
+import sys
+sys.path.insert(0, "/home/israel/movie-reco")
 import pandas as pd
 from ml.sentence_recommander import SimilarityRecommander
 from ml.themes import ThemeRecommander
 from ml.tfidf import TfIdf
-from data_management.mongo_utils import movie_from_title
+from data_management.mongo_utils import movie_from_title, most_popular_titles, get_matching_titles
 from flask import jsonify, request
 from flask_cors import CORS
 import os
 from os.path import expanduser
-import pickle
 
 
 app = Flask(__name__)
@@ -26,15 +27,14 @@ themes_recommander = ThemeRecommander(**THEMES_DATA)
 
 @app.route('/autocomplete')
 def get_completion_all():
-    return jsonify({'results': []})
+    titles = most_popular_titles()
+    return jsonify({'results': titles})
 
 
 @app.route('/autocomplete/<string:text>')
 def get_completion(text):
-    # text = text.lower()
-    # match = [m for m in recommanders[DEFAULT_RECOMMANDER].movies_map if text in m.lower()]
-    # match = match[:50]
-    return jsonify({'results': []})
+    titles = get_matching_titles(text) if len(text) >= 3 else most_popular_titles()
+    return jsonify({'results': titles})
 
 
 def format_movies(movies):

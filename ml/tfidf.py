@@ -24,7 +24,7 @@ class TfIdf(ComparableModel):
         self.NNeighbors = pickle.load(open(dirname + "/NNeighbors.pk", "rb"))
         self.vectorizer = pickle.load(open(dirname + "/vectorizer.pk", "rb"))
         self.mapping = pickle.load(open(dirname + "/mapping.pk", "rb"))
-        return 
+        return self
 
     def _recommand_to_ids(self, ip: str, n_reco):
         input_text = TfIdf.text_preprocessing(ip)
