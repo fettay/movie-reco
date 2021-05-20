@@ -37,7 +37,7 @@ class Movie extends Component {
   getRecommandationsMovie(){
     axios.get(process.env.REACT_APP_API + "movie/" + this.recoType + "/" + this.currentMovie)
     .then(res => {
-      this.setState({recommandations: res.data.results,
+      this.setState({recommandations: res.data.results.map(x => x.title),
                      summary: res.data.summary,
                      tags: res.data.tags});
       console.log(res.data.results);
@@ -61,7 +61,7 @@ class Movie extends Component {
 
     var movies = [];
 
-    this.state.recommandations.forEach(movie => {
+    this.state.recommandations.slice(0, 25).forEach(movie => {
       movies.push(<li>{movie}</li>);
     });
 
