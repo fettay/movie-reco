@@ -20,7 +20,7 @@ def get_connection_url(user, password, url):
 
 def movies_from_ids(object_ids):
     collection = get_collection()
-    return [Movie(**kwargs) for kwargs in list(collection.find({"_id": {"$in": object_ids}}))]
+    return [Movie(**list(collection.find({"_id": object_id}))[0]) for object_id in object_ids]
 
 
 def movie_from_title(title: str):

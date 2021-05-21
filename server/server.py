@@ -1,13 +1,14 @@
 from flask import Flask
 import sys
 import pandas as pd
+from os.path import expanduser
+sys.path.insert(0, expanduser("~/movie-reco/"))
 from ml.sentence_recommander import SimilarityRecommander
 from ml.themes import ThemeRecommander
 from ml.tfidf import TfIdf
 from data_management.mongo_utils import movie_from_title, most_popular_titles, get_matching_titles
 from flask import jsonify, request
 from flask_cors import CORS
-from os.path import expanduser
 
 
 app = Flask(__name__)

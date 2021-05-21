@@ -11,7 +11,6 @@ function App() {
           <Route path="/ip" exact component={() => <Ip />} />
           <Route path="/map" exact component={() => <Map />} />
         </Switch>
-        <Footer />
       </Router>
     </div>
   );
