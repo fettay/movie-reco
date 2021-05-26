@@ -66,9 +66,11 @@ class Movie extends Component {
     });
 
     var tags = [];
-    this.state.tags.forEach(tag => {
-      tags.push(<span class="badge badge-pill badge-primary tags">{tag}</span>)
-    });
+    if (this.state.tags) {
+      this.state.tags.forEach(tag => {
+        tags.push(<span class="badge badge-pill badge-primary tags">{tag}</span>)
+      })
+    };
 
 
     return (

@@ -58,7 +58,7 @@ class TfIdf(ComparableModel):
                 for fil in filters:
                     text = text.replace(fil, "")
         text = text.lower()
-        words = re.findall('[a-zA-Z]{2,}', text)
+        words = re.findall('[a-zA-Z-]{2,}', text)
         words = [w for w in words if w not in stopwords.words('english')]
         words = [ps.stem(w) for w in words]
         return ' '.join(words)

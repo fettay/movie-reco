@@ -33,6 +33,16 @@ class Movie:
             return getattr(self, attr)
         return default_val
 
+    def select_plot(self):
+        """return the closest plot to 1500 characters"""
+        if hasattr(self, 'plot') and self.plot is not None:
+            plot = [x.split('::')[0] for x in self.plot]
+            lengths = [abs(len(x) - 1500) for x in plot]
+            closest_plot = plot[plot.index(min(plot))]
+        else:
+            closest_plot = None
+        return closest_plot
+
     @staticmethod
     def _load_imdb_data(imdbID: str) -> 'Movie':
         ia = IMDb()

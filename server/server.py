@@ -32,7 +32,7 @@ def get_completion_all():
 
 @app.route('/autocomplete/<string:text>')
 def get_completion(text):
-    titles = get_matching_titles(text) #if len(text) >= 3 else most_popular_titles()
+    titles = get_matching_titles(text)
     return jsonify({'results': titles})
 
 
