@@ -9,7 +9,7 @@ from tqdm import tqdm
 class RfModel(ComparableModel):
 
     def __init__(self):
-        logging.basicConfig(level=logging.DEBUG, filename='/home/israel/logs/theme_algo.log')
+        logging.basicConfig(level=logging.INFO, filename='/home/israel/logs/theme_algo.log')
 
 
     def load(self, dirname: str):
@@ -25,16 +25,12 @@ class RfModel(ComparableModel):
 
 
     def _recommand_to_ids(self, ip: str, n_reco: int):
-        # input_text = TfIdf.text_preprocessing(ip)
-        # my_vector = self.vectorizer.transform([input_text])
-        # my_vector = self.scaler.transform(my_vector)
-        logging.debug('ip: {}'.format(ip))
-        theme_predictions = self.predict_themes_from_ip(ip)
-        neighbors = self.NNeighbors.kneighbors([theme_predictions], return_distance=False)[0][:n_reco]
-        #neighbors = list(range(10))
-        logging.debug('neighbors: {}'.format(neighbors))
+        logging.info('ip: {}'.format(ip))
+        theme_probas = self.predict_probas_from_ip(ip)
+        neighbors = self.NNeighbors.kneighbors([theme_probas], return_distance=False)[0][:n_reco]
+        logging.info('neighbors: {}'.format(neighbors))
         mapped_ids = [self.mapping[neigh] for neigh in neighbors]
-        logging.debug('ids: {}'.format(mapped_ids))
+        logging.info('ids: {}'.format(mapped_ids))
         return mapped_ids
 
 
@@ -43,17 +39,24 @@ class RfModel(ComparableModel):
         return movies_from_ids(ids)
 
 
+    def predict_themes(self, ip: str):
+        theme_probas = self.predict_probas_from_ip(ip)
+        theme_predictions = [int(p>0.5) for p in theme_probas]
+        themes_predictions = [theme for (i, theme) in zip(range(len(self.trees)), self.trees) \
+            if theme_predictions[i]==1]
+        return theme_predictions
+
+
     def recommand_from_movie(self, movie_name: str, n_reco: int):
         raise NotImplementedError
         
 
-    def predict_themes_from_ip(self, ip: str):
+    def predict_probas_from_ip(self, ip: str):
         input_text = TfIdf.text_preprocessing(ip)
         my_vector = self.vectorizer.transform([input_text])
         my_vector = self.scaler.transform(my_vector)
-        #theme_predictions = [model.predict_proba(my_vector)[0][1] for model in self.trees.values()]
         my_predictions = [self.trees[theme].predict_proba(my_vector)[0][1] for theme in self.trees]
-        logging.debug('my predictions: {}'.format(my_predictions))
+        logging.info('my predictions: {}'.format(my_predictions))
         return my_predictions
 
 

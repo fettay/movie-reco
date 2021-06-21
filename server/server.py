@@ -60,8 +60,10 @@ def get_movie_reco(recommander_name, movie):
 @app.route('/ip/<string:recommander_name>', methods=['POST'])
 def get_ip_reco(recommander_name):
     ip = request.json.get("ip")
-    movies = recommanders[recommander_name].recommand_from_ip(ip, 200)
-    return jsonify({'results': format_movies(movies)})
+    movies = recommanders[recommander_name].recommand_from_ip(ip, 500)
+    themes = recommanders[recommander_name].predict_themes(ip)
+    return jsonify({'results': format_movies(movies),
+                    'themes': themes})
 
 
 @app.route('/themes', methods=['POST'])

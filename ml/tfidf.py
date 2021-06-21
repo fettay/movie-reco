@@ -20,9 +20,9 @@ class TfIdf(ComparableModel):
         self.mapping = None
     
     def load(self, dirname: str):
-        self.NNeighbors = pickle.load(open(dirname + "/NNeighbors.pk", "rb"))
-        self.vectorizer = pickle.load(open(dirname + "/vectorizer.pk", "rb"))
-        self.mapping = pickle.load(open(dirname + "/mapping.pk", "rb"))
+        self.NNeighbors = pickle.load(open(dirname + "NNeighbors.pk", "rb"))
+        self.vectorizer = pickle.load(open(dirname + "vectorizer.pk", "rb"))
+        self.mapping = pickle.load(open(dirname + "mapping.pk", "rb"))
         return self
 
     def _recommand_to_ids(self, ip: str, n_reco):
@@ -35,6 +35,11 @@ class TfIdf(ComparableModel):
     def recommand_from_ip(self, ip: str, n_reco: int=25):
         ids = self._recommand_to_ids(ip, n_reco)
         return movies_from_ids(ids)
+
+
+    def predict_themes(self, ip: str):
+        return []
+
 
     def query_movie(self, movie_str: str, n_reco: int=25):
         movie = movie_from_title(movie_str)
