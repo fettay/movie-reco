@@ -5,7 +5,8 @@ from os.path import expanduser
 sys.path.insert(0, expanduser("~/movie-reco/"))
 from ml.sentence_recommander import SimilarityRecommander
 from ml.themes import ThemeRecommander
-from ml.tfidf import TfIdf
+from ml.tfidf import TfIdf, my_tokenizer
+from ml.theme_algo import RfModel
 from data_management.mongo_utils import movie_from_title, most_popular_titles, get_matching_titles
 from flask import jsonify, request
 from flask_cors import CORS
@@ -18,9 +19,9 @@ THEMES_DATA = {'tokenizer_path': "distilbert-base-uncased",
                "model_path": "models/themes"}
 CORS(app)
 
-recommanders = {'tagline' : SimilarityRecommander("tagline").load(MODELS_PATH + "tagline"),
-                'storyline': TfIdf().load(MODELS_PATH + "tfidf"),
-                'synopsis': SimilarityRecommander("synopsis").load(MODELS_PATH + "synopsis")}
+recommanders = {'DL' : SimilarityRecommander("tagline").load(MODELS_PATH + "tagline"),
+                'TfIdf': TfIdf().load(MODELS_PATH + "tfidf/"),
+                'TreeDecision': RfModel().load(MODELS_PATH + "theme_algo/")}
 
 themes_recommander = ThemeRecommander(**THEMES_DATA)
 
@@ -32,7 +33,10 @@ def get_completion_all():
 
 @app.route('/autocomplete/<string:text>')
 def get_completion(text):
-    titles = get_matching_titles(text)
+    if text:
+        titles = get_matching_titles(text)
+    else:
+        titles = most_popular_titles()
     return jsonify({'results': titles})
 
 

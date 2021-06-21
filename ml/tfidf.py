@@ -1,16 +1,15 @@
 import re
-import spacy
 import pickle
-from nltk.corpus import stopwords
+from nltk import ngrams
 from nltk.stem import PorterStemmer
 
 from ml.mlmodel import ComparableModel
 from data_management.mongo_utils import movies_from_ids, movie_from_title
 
 
-spacy_categories = ['PERSON', 'DATE']
 ps = PorterStemmer()
-nlp = spacy.load('en_core_web_sm')
+stopwords = open("/home/israel/research/models/stopwords.txt", "r").read().split(', ')
+
 
 class TfIdf(ComparableModel):
 
@@ -32,6 +31,7 @@ class TfIdf(ComparableModel):
         neighbors = self.NNeighbors.kneighbors(vector, return_distance=False)[0][:n_reco]
         return [self.mapping[neigh] for neigh in neighbors]
     
+    
     def recommand_from_ip(self, ip: str, n_reco: int=25):
         ids = self._recommand_to_ids(ip, n_reco)
         return movies_from_ids(ids)
@@ -51,14 +51,18 @@ class TfIdf(ComparableModel):
 
     @staticmethod
     def text_preprocessing(text: str) -> str:
-        text = text.replace("_", "")
-        for ent in nlp(text).ents:
-            if ent.label_ in spacy_categories:
-                filters = ent.text.split()
-                for fil in filters:
-                    text = text.replace(fil, "")
         text = text.lower()
-        words = re.findall('[a-zA-Z-]{2,}', text)
-        words = [w for w in words if w not in stopwords.words('english')]
+        words = re.findall('[a-zA-Z-]{2,}|[,;:\.]', text)
+        words = [w.replace('.', ' |').replace(',', ' |').replace(':', '|').replace(';', '|') for w in words]
+        words = [w if w not in stopwords else '|' for w in words]
         words = [ps.stem(w) for w in words]
         return ' '.join(words)
+
+
+def n_gram(text, n):
+    return [" ".join(x) for x in list(ngrams(text.split(), n)) if '|' not in x]
+
+
+def my_tokenizer(text):
+    my_tokens = text.split() + n_gram(text, 2) + n_gram(text, 3)
+    return [t for t in my_tokens if t!='|']

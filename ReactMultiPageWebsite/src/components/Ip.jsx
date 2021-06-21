@@ -28,7 +28,7 @@ class Ip extends Component {
       minVotes: 0
     };
     this.curContent = "";
-    this.recoType = "storyline";
+    this.recoType = "TfIdf";
   }
   
 
@@ -105,14 +105,14 @@ class Ip extends Component {
                 exclusive
                 onChange={this.handleTypeChange.bind(this)}
                 aria-label="text alignment">
-                <ToggleButton value="tagline" aria-label="tagline">
-                  Tagline
+                <ToggleButton value="DL" aria-label="tagline">
+                  DL Model
                 </ToggleButton>
-                <ToggleButton value="storyline" aria-label="storyline">
-                  Storyline
+                <ToggleButton value="TfIdf" aria-label="Hel">
+                  TfIdf
                 </ToggleButton>
-                <ToggleButton value="synopsis" aria-label="synopsis">
-                  Synopsis
+                <ToggleButton value="TreeDecision" aria-label="synopsis">
+                  ML Model
                 </ToggleButton>
               </ToggleButtonGroup>
             </div>

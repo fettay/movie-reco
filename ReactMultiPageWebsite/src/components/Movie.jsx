@@ -17,7 +17,7 @@ class Movie extends Component {
       tags: [],
     };
     this.currentMovie = "";
-    this.recoType = "storyline";
+    this.recoType = "TfIdf";
   }
   
   componentDidMount(){
@@ -83,14 +83,14 @@ class Movie extends Component {
               exclusive
               onChange={this.handleTypeChange.bind(this)}
               aria-label="text alignment">
-              <ToggleButton value="tagline" aria-label="tagline">
-                Tagline
+              <ToggleButton value="DL" aria-label="tagline">
+                DL Model
               </ToggleButton>
-              <ToggleButton value="storyline" aria-label="storyline">
-                Storyline
+              <ToggleButton value="TfIdf" aria-label="storyline">
+                TfIdf
               </ToggleButton>
-              <ToggleButton value="synopsis" aria-label="synopsis">
-                Synopsis
+              <ToggleButton value="TreeDecision" aria-label="synopsis">
+                ML Model
               </ToggleButton>
             </ToggleButtonGroup>
             </div>
