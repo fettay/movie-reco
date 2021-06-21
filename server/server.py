@@ -19,7 +19,7 @@ THEMES_DATA = {'tokenizer_path': "distilbert-base-uncased",
                "model_path": "models/themes"}
 CORS(app)
 
-recommanders = {'DL' : SimilarityRecommander("tagline").load(MODELS_PATH + "tagline"),
+recommanders = {#'DL' : SimilarityRecommander("tagline").load(MODELS_PATH + "tagline"),
                 'TfIdf': TfIdf().load(MODELS_PATH + "tfidf/"),
                 'TreeDecision': RfModel().load(MODELS_PATH + "theme_algo/")}
 
@@ -60,7 +60,7 @@ def get_movie_reco(recommander_name, movie):
 @app.route('/ip/<string:recommander_name>', methods=['POST'])
 def get_ip_reco(recommander_name):
     ip = request.json.get("ip")
-    movies = recommanders[recommander_name].recommand_from_ip(ip, 500)
+    movies = recommanders[recommander_name].recommand_from_ip(ip, 200)
     return jsonify({'results': format_movies(movies)})
 
 

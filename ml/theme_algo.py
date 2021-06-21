@@ -1,4 +1,5 @@
 import pickle
+import logging
 from os import listdir
 from ml.mlmodel import ComparableModel
 from ml.tfidf import TfIdf, my_tokenizer
@@ -8,7 +9,7 @@ from tqdm import tqdm
 class RfModel(ComparableModel):
 
     def __init__(self):
-        pass
+        logging.basicConfig(level=logging.DEBUG, filename='/home/israel/logs/theme_algo.log')
 
 
     def load(self, dirname: str):
@@ -27,14 +28,19 @@ class RfModel(ComparableModel):
         # input_text = TfIdf.text_preprocessing(ip)
         # my_vector = self.vectorizer.transform([input_text])
         # my_vector = self.scaler.transform(my_vector)
+        logging.debug('ip: {}'.format(ip))
         theme_predictions = self.predict_themes_from_ip(ip)
         neighbors = self.NNeighbors.kneighbors([theme_predictions], return_distance=False)[0][:n_reco]
-        return [self.mapping[neigh] for neigh in neighbors]
+        #neighbors = list(range(10))
+        logging.debug('neighbors: {}'.format(neighbors))
+        mapped_ids = [self.mapping[neigh] for neigh in neighbors]
+        logging.debug('ids: {}'.format(mapped_ids))
+        return mapped_ids
 
 
     def recommand_from_ip(self, ip: str, n_reco: int=25):
         ids = self._recommand_to_ids(ip, n_reco)
-        return [movies_from_ids([_id])[0] for _id in ids]
+        return movies_from_ids(ids)
 
 
     def recommand_from_movie(self, movie_name: str, n_reco: int):
@@ -46,7 +52,9 @@ class RfModel(ComparableModel):
         my_vector = self.vectorizer.transform([input_text])
         my_vector = self.scaler.transform(my_vector)
         #theme_predictions = [model.predict_proba(my_vector)[0][1] for model in self.trees.values()]
-        return [self.trees[theme].predict(my_vector)[0] for theme in self.trees]
+        my_predictions = [self.trees[theme].predict_proba(my_vector)[0][1] for theme in self.trees]
+        logging.debug('my predictions: {}'.format(my_predictions))
+        return my_predictions
 
 
     def query_movie(self, movie_str: str, n_reco: int=25):
