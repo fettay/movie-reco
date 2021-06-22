@@ -18,7 +18,7 @@ class RfModel(ComparableModel):
         self.scaler = pickle.load(open(dirname + "scaler.pk", "rb"))
         self.vectorizer = pickle.load(open(dirname + "vectorizer.pk", "rb"))
         self.tree_directory = dirname + "trees/"
-        all_themes = listdir(self.tree_directory)
+        all_themes = listdir(self.tree_directory)[:10]
         self.trees = {theme.split('.pk')[0]: pickle.load(open(self.tree_directory+theme, "rb")) \
                                 for theme in tqdm(all_themes)}
         return self
