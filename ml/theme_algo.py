@@ -17,7 +17,7 @@ class RfModel(ComparableModel):
         self.scaler = pickle.load(open(dirname + "scaler.pk", "rb"))
         self.vectorizer = pickle.load(open(dirname + "vectorizer.pk", "rb"))
         self.tree_directory = dirname + "trees/"
-        all_themes = listdir(self.tree_directory)[:10]
+        all_themes = listdir(self.tree_directory)
         self.trees = {theme.split('.pk')[0]: pickle.load(open(self.tree_directory+theme, "rb")) \
                                 for theme in tqdm(all_themes)}
         return self
@@ -54,18 +54,5 @@ class RfModel(ComparableModel):
         my_predictions = [self.trees[theme].predict_proba(my_vector)[0][1] for theme in self.trees]
         return my_predictions
 
-
-    def query_movie(self, movie_str: str, n_reco: int=25):
-        movie = movie_from_title(movie_str)
-
-        if not hasattr(movie, 'plot_outline'):
-            return None
-        
-        ip = movie.plot_outline
-
-        if ip is None or len(ip) == 0:
-            return None
-        
-        return self.recommand_from_ip(ip, n_reco)
 
 

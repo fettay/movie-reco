@@ -9,6 +9,7 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import GenrePicker from "./GenrePicker";
 import MovieRow from "./MovieRow";
 
+const default_ip = "A little boy named Andy loves to be in his room, playing with his toys, especially his doll named Woody. But, what do the toys do when Andy is not with them, they come to life. Woody believes that his life (as a toy) is good. However, he must worry about Andy\'s family moving, and what Woody does not know is about Andy\'s birthday party. Woody does not realize that Andy\'s mother gave him an action figure known as Buzz Lightyear, who does not believe that he is a toy, and quickly becomes Andy\'s new favorite toy. Woody, who is now consumed with jealousy, tries to get rid of Buzz. Then, both Woody and Buzz are now lost. They must find a way to get back to Andy before he moves without them, but they will have to pass through a ruthless toy killer";
 
 class Ip extends Component {
   constructor (props) {
@@ -23,7 +24,7 @@ class Ip extends Component {
       minYear: 1950,
       minVotes: 0
     };
-    this.curContent = "A cowboy doll is profoundly threatened and jealous when a new spaceman figure supplants him as top toy in a boy's room.";
+    this.curContent = default_ip
     this.recoType = "TfIdf";
     this.filterRecommandation = this.filterRecommandation.bind(this);
   }
@@ -92,7 +93,7 @@ class Ip extends Component {
             rows={10}
             onChange={(val) => this.curContent = val.target.value}
             variant="outlined"
-            placeholder="A cowboy doll is profoundly threatened and jealous when a new spaceman figure supplants him as top toy in a boy's room."
+            placeholder={default_ip}
             />
             <Button className="button-validate" variant="contained" color="primary" onClick={() => this.getAllRecommandations()}>
               Recommend
