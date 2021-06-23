@@ -9,7 +9,8 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import GenrePicker from "./GenrePicker";
 import MovieRow from "./MovieRow";
 import ThemesPicker from "./ThemesPicker";
-import DotLoader from "react-spinners/DotLoader";
+import BounceLoader from "react-spinners/BounceLoader";
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 
 const default_ip = "A little boy named Andy loves to be in his room, playing with his toys, especially his doll named Woody. But, what do the toys do when Andy is not with them, they come to life. Woody believes that his life (as a toy) is good. However, he must worry about Andy\'s family moving, and what Woody does not know is about Andy\'s birthday party. Woody does not realize that Andy\'s mother gave him an action figure known as Buzz Lightyear, who does not believe that he is a toy, and quickly becomes Andy\'s new favorite toy. Woody, who is now consumed with jealousy, tries to get rid of Buzz. Then, both Woody and Buzz are now lost. They must find a way to get back to Andy before he moves without them, but they will have to pass through a ruthless toy killer";
@@ -31,14 +32,18 @@ class Ip extends Component {
       currentGenres: [],
       currentThemes: [],
       minYear: 1950,
-      minVotes: 0
+      minVotes: 0,
+      isLoading: false,
+      moviesDisplayed: []
     };
-    this.isLoading = false;
     this.curContent = default_ip
     this.recoType = "TfIdf";
+    this.moviesDisplayed = [];
+    this.lastLoadedIndex = 0;
     this.filterRecommandation = this.filterRecommandation.bind(this);
     this.handleThemeAdd = this.handleThemeAdd.bind(this);
     this.handleGenreAdd = this.handleGenreAdd.bind(this);
+    this.filterDisplayedMovies = this.filterDisplayedMovies.bind(this);
   }
   
 
@@ -49,13 +54,12 @@ class Ip extends Component {
     //   console.log(res.data.results);
     // });
 
-    this.isLoading = true;
+    this.setState({allRecommandations: [], tags: [], isLoading: true});
 
     axios.post(process.env.REACT_APP_API + "ip/" + this.recoType, {ip: this.curContent})
     .then(res => {
-      this.setState({allRecommandations: res.data.results});
-      this.setState({tags: res.data.themes});
-      this.isLoading = false;;
+      this.setState({allRecommandations: res.data.results, tags: res.data.themes, isLoading: false}, 
+        () => this.addMovies());
     });
   }
 
@@ -72,16 +76,26 @@ class Ip extends Component {
   }
 
   handleThemeAdd(currentThemes){
-    this.setState({currentThemes: currentThemes});
+    this.setState({currentThemes: currentThemes}, () => this.filterDisplayedMovies());
   }
 
   handleGenreAdd(currentGenres){
-    this.setState({currentGenres: currentGenres});
+    this.setState({currentGenres: currentGenres}, () => this.filterDisplayedMovies());
+  }
+
+  filterMovie(movie){
+    return this.hasCommonGenre(movie.genres, this.state.currentGenres) && movie.year >= this.state.minYear && movie.votes >= this.state.minVotes && this.hasAllThemes(movie.themes, this.state.currentThemes);
   }
 
   filterRecommandation(){
-    var recos = this.state.allRecommandations.filter(movie => this.hasCommonGenre(movie.genres, this.state.currentGenres) && movie.year >= this.state.minYear && movie.votes >= this.state.minVotes && this.hasAllThemes(movie.themes, this.state.currentThemes));
-    return recos.slice(0, 25);                                            
+    var recos = this.state.allRecommandations.filter(movie => this.filterMovie(movie));
+    return recos                                         
+  }
+
+  filterDisplayedMovies(){
+    this.moviesDisplayed = this.moviesDisplayed.filter(movie => this.filterMovie(movie.props));
+    console.log(this.moviesDisplayed);
+    this.setState({moviesDisplayed: this.moviesDisplayed});                                         
   }
 
   handleTypeChange(event, newValue){
@@ -93,14 +107,20 @@ class Ip extends Component {
     this.getAllRecommandations();
   }
 
+  addMovies(){
+    const timeout = this.moviesDisplayed.length == 0 ? 0 : 1000;
+    this.moviesDisplayed = [];
+    setTimeout(() => {
+      this.filterRecommandation(this.state.currentGenres, this.state.currentThemes).slice(0, this.lastLoadedIndex + 25).forEach(movie => {
+        this.moviesDisplayed.push(<MovieRow genres={movie.genres} votes={movie.votes} themes={movie.themes} id={movie.id} imgUrl={movie.cover_url} title={movie.title} tagline={movie.tagline} year={movie.year}/>);
+      });
+      this.setState({moviesDisplayed: this.moviesDisplayed});
+      this.lastLoadedIndex = this.lastLoadedIndex + 25;
+    }, timeout);
+  }
+
+
   render(){
-
-    const movies = [];
-
-    this.filterRecommandation(this.state.currentGenres, this.state.currentThemes).forEach(movie => {
-      movies.push(<MovieRow id={movie.id} imgUrl={movie.cover_url} title={movie.title} tagline={movie.tagline} year={movie.year}/>);
-    });
-
     var tags = [];
     this.state.tags.forEach(tag => {
       tags.push(<span class="badge badge-pill badge-primary tags">{tag}</span>)
@@ -153,7 +173,7 @@ class Ip extends Component {
                   defaultValue={1950}
                   aria-labelledby="discrete-slider"
                   valueLabelDisplay="auto"
-                  onChange={(event, newValue) => this.setState({minYear: newValue})}
+                  onChange={(event, newValue) => this.setState({minYear: newValue}, () => this.filterDisplayedMovies())}
                   step={10}
                   marks
                   min={1950}
@@ -169,7 +189,7 @@ class Ip extends Component {
                   aria-labelledby="discrete-slider"
                   valueLabelDisplay="auto"
                   getAriaValueText={x => `${x}K`}
-                  onChange={(event, newValue) => this.setState({minVotes: newValue * 200})}
+                  onChange={(event, newValue) => this.setState({minVotes: newValue * 1000}, () => this.filterDisplayedMovies())}
                   step={10}
                   marks
                   min={0}
@@ -178,19 +198,25 @@ class Ip extends Component {
               </div>
             </div>
           </div>
-          <div class="row align-items-center my-5">
-            <div class="col-lg-12">
-            <ThemesPicker recommendedTags={this.state.tags} updateFunction={this.handleThemeAdd} />
-            <DotLoader color="#3f51b5" loading={!this.isLoading} css={override} size={70} />
-            <div class="table-responsive">
-              <table class="table table-hover">
-                <tbody>
-                  {movies}
-                </tbody>
-              </table>
+          <InfiniteScroll next={this.addMovies.bind(this)} 
+                          hasMore={() => this.lastLoadedIndex + 25 < this.state.allRecommandations.length} 
+                          dataLength={this.moviesDisplayed.length}
+                          loader={<h6>Loading movies...</h6>}
+                          endMessage={<h6>End</h6>}>
+            <div class="row align-items-center my-5">
+              <div class="col-lg-12">
+              <ThemesPicker recommendedTags={this.state.tags} updateFunction={this.handleThemeAdd} />
+              <BounceLoader color="#3f51b5" loading={this.state.isLoading} css={override} size={70} />
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <tbody>
+                    {this.moviesDisplayed}
+                  </tbody>
+                </table>
+              </div>
+              </div>
             </div>
-            </div>
-          </div>
+          </InfiniteScroll>
         </div>
       </div>
     );
