@@ -9,9 +9,15 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import GenrePicker from "./GenrePicker";
 import MovieRow from "./MovieRow";
 import ThemesPicker from "./ThemesPicker";
+import DotLoader from "react-spinners/DotLoader";
 
 
 const default_ip = "A little boy named Andy loves to be in his room, playing with his toys, especially his doll named Woody. But, what do the toys do when Andy is not with them, they come to life. Woody believes that his life (as a toy) is good. However, he must worry about Andy\'s family moving, and what Woody does not know is about Andy\'s birthday party. Woody does not realize that Andy\'s mother gave him an action figure known as Buzz Lightyear, who does not believe that he is a toy, and quickly becomes Andy\'s new favorite toy. Woody, who is now consumed with jealousy, tries to get rid of Buzz. Then, both Woody and Buzz are now lost. They must find a way to get back to Andy before he moves without them, but they will have to pass through a ruthless toy killer";
+
+const override = `
+  display: block;
+  margin: 0 auto;
+`;
 
 class Ip extends Component {
   constructor (props) {
@@ -27,6 +33,7 @@ class Ip extends Component {
       minYear: 1950,
       minVotes: 0
     };
+    this.isLoading = false;
     this.curContent = default_ip
     this.recoType = "TfIdf";
     this.filterRecommandation = this.filterRecommandation.bind(this);
@@ -42,10 +49,13 @@ class Ip extends Component {
     //   console.log(res.data.results);
     // });
 
+    this.isLoading = true;
+
     axios.post(process.env.REACT_APP_API + "ip/" + this.recoType, {ip: this.curContent})
     .then(res => {
       this.setState({allRecommandations: res.data.results});
       this.setState({tags: res.data.themes});
+      this.isLoading = false;;
     });
   }
 
@@ -95,7 +105,6 @@ class Ip extends Component {
     this.state.tags.forEach(tag => {
       tags.push(<span class="badge badge-pill badge-primary tags">{tag}</span>)
     });
-
 
     return (
       <div className="home">
@@ -172,6 +181,7 @@ class Ip extends Component {
           <div class="row align-items-center my-5">
             <div class="col-lg-12">
             <ThemesPicker recommendedTags={this.state.tags} updateFunction={this.handleThemeAdd} />
+            <DotLoader color="#3f51b5" loading={!this.isLoading} css={override} size={70} />
             <div class="table-responsive">
               <table class="table table-hover">
                 <tbody>
