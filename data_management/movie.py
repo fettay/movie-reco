@@ -55,6 +55,7 @@ class Movie:
             for key in RELEVANT_KEYS:
                 setattr(my_movie, key, imdb_movie.data.get(key))
             setattr(my_movie, 'keywords', ia.get_movie_keywords(imdbID)['data'].get('keywords'))
+            setattr(my_movie, 'cover_url', imdb_movie.data.get('cover url'))
             if my_movie.plot:
                 my_movie.plot = [text.split('::')[0] for text in my_movie.plot]
                 # alternative to argmin builtin function

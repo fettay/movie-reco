@@ -47,7 +47,10 @@ def format_movies(movies):
     return  [{'title': movie.get("title", ""), 
               'genres': movie.get("genres", []),
               'votes': movie.get("votes", 0), 
-              'year': movie.get("year", 0)}
+              'year': movie.get("year", 0),
+              'cover_url': movie.get("cover_url", ""),
+              'tagline': movie.get("tagline", ""),
+              'id': movie.get("imdbID")}
               for movie in movies]
 
 

@@ -22,11 +22,11 @@ class Ip extends Component {
       allRecommandations: [],
       movieReco: "",
       tags: [],
-      currentGenres: [],
+      currentGenres: ["Animation"],
       minYear: 1950,
       minVotes: 0
     };
-    this.curContent = "";
+    this.curContent = "A cowboy doll is profoundly threatened and jealous when a new spaceman figure supplants him as top toy in a boy's room.";
     this.recoType = "TfIdf";
     this.filterRecommandation = this.filterRecommandation.bind(this);
   }
@@ -61,7 +61,7 @@ class Ip extends Component {
     if (currentGenres != this.state.currentGenres)
       this.setState({currentGenres: currentGenres});
     var recos = this.state.allRecommandations.filter(movie => this.hasCommonGenre(movie.genres, currentGenres) && movie.year >= this.state.minYear && movie.votes >= this.state.minVotes);
-    return recos.slice(0, 25).map(movie => movie.title);                                            
+    return recos.slice(0, 25);                                            
   }
 
   handleTypeChange(event, newValue){
@@ -69,16 +69,16 @@ class Ip extends Component {
     this.getAllRecommandations();
   }
 
+  componentDidMount(){
+    this.getAllRecommandations();
+  }
+
   render(){
 
     const movies = [];
 
-    // this.filterRecommandation(this.state.currentGenres).forEach(movie => {
-    //   movies.push(<MovieRow></MovieRow>);
-    // });
-
-    Array(8).fill(0).forEach(() => {
-        movies.push(<MovieRow></MovieRow>);
+    this.filterRecommandation(this.state.currentGenres).forEach(movie => {
+      movies.push(<MovieRow id={movie.id} imgUrl={movie.cover_url} title={movie.title} tagline={movie.tagline} year={movie.year}/>);
     });
 
     var tags = [];
@@ -99,9 +99,10 @@ class Ip extends Component {
             rows={10}
             onChange={(val) => this.curContent = val.target.value}
             variant="outlined"
+            value="A cowboy doll is profoundly threatened and jealous when a new spaceman figure supplants him as top toy in a boy's room."
             />
-            <Button variant="contained" color="primary" onClick={() => this.getAllRecommandations()}>
-              Validate
+            <Button className="button-validate" variant="contained" color="primary" onClick={() => this.getAllRecommandations()}>
+              Recommend
             </Button>
           </div>
           <div class="col-md-6">
@@ -165,11 +166,13 @@ class Ip extends Component {
                   {tags}
                 </div>
             </div>
-            <table class="table table-hover">
-              <tbody>
-                {movies}
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <tbody>
+                  {movies}
+                </tbody>
+              </table>
+            </div>
             </div>
           </div>
         </div>

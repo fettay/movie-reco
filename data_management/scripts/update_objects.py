@@ -6,6 +6,8 @@ from tqdm import tqdm
 from data_management.mongo_utils import get_collection
 from data_management.movie import Movie
 from data_management.utils.movie_lens import MovieLensApi
+from imdb import IMDb
+
 
 def _add_best_similar_data(id_):
     collection = get_collection()
@@ -28,6 +30,29 @@ def add_best_similar_data():
     process_map(_add_best_similar_data, ids, max_workers=10, chunksize=100)
 
 
+def _add_imdb_field(args):
+    id_, field_imdb_name, field_db_name = args
+    collection = get_collection()
+    ia = IMDb()
+    m = collection.find_one({"_id": id_})
+    if not m.get(field_db_name) is None:
+        return
+    m = Movie(**m)
+    field_data = ia.get_movie(m.imdbID).get(field_imdb_name)
+    if field_data is not None:
+        setattr(m, field_db_name, field_data)
+        m.upload_to_mongo(collection)
+        logging.info("Updated movie %s but found data" % m.title)
+    else:
+        logging.info("Updated movie %s and found nothing" % m.title)
+
+
+def add_imdb_field(field_imdb_name, field_db_name):
+    collection = get_collection()
+    ids = collection.find().distinct('_id')
+    process_map(_add_imdb_field, [(id_, field_imdb_name, field_db_name) for id_ in ids], chunksize=200, max_workers=5)
+
+
 def add_movie_lens_data():
     collection = get_collection()
     api = MovieLensApi('mfettaya@hotmail.com', "zxczxczxc")
@@ -43,5 +68,5 @@ def add_movie_lens_data():
 
 
 if __name__ == "__main__":
-    pass
+    add_imdb_field("cover url", "cover_url")
 
