@@ -7,8 +7,8 @@ function App() {
       <Router>
         <Navigation />
         <Switch>
-          <Route path="/" exact component={() => <Movie />} />
-          <Route path="/ip" exact component={() => <Ip />} />
+          <Route path="/movie" exact component={() => <Movie />} />
+          <Route path="/" exact component={() => <Ip />} />
           <Route path="/map" exact component={() => <Map />} />
         </Switch>
       </Router>

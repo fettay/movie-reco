@@ -8,6 +8,8 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import GenrePicker from "./GenrePicker";
 import MovieRow from "./MovieRow";
+import ThemesPicker from "./ThemesPicker";
+
 
 const default_ip = "A little boy named Andy loves to be in his room, playing with his toys, especially his doll named Woody. But, what do the toys do when Andy is not with them, they come to life. Woody believes that his life (as a toy) is good. However, he must worry about Andy\'s family moving, and what Woody does not know is about Andy\'s birthday party. Woody does not realize that Andy\'s mother gave him an action figure known as Buzz Lightyear, who does not believe that he is a toy, and quickly becomes Andy\'s new favorite toy. Woody, who is now consumed with jealousy, tries to get rid of Buzz. Then, both Woody and Buzz are now lost. They must find a way to get back to Andy before he moves without them, but they will have to pass through a ruthless toy killer";
 
@@ -21,12 +23,15 @@ class Ip extends Component {
       movieReco: "",
       tags: [],
       currentGenres: [],
+      currentThemes: [],
       minYear: 1950,
       minVotes: 0
     };
     this.curContent = default_ip
     this.recoType = "TfIdf";
     this.filterRecommandation = this.filterRecommandation.bind(this);
+    this.handleThemeAdd = this.handleThemeAdd.bind(this);
+    this.handleGenreAdd = this.handleGenreAdd.bind(this);
   }
   
 
@@ -41,7 +46,6 @@ class Ip extends Component {
     .then(res => {
       this.setState({allRecommandations: res.data.results});
       this.setState({tags: res.data.themes});
-      console.log(res.data.results);
     });
   }
 
@@ -51,10 +55,22 @@ class Ip extends Component {
     return genres.filter(genre => currentGenres.includes(genre)).length > 0
   }
 
-  filterRecommandation(currentGenres){
-    if (currentGenres != this.state.currentGenres)
-      this.setState({currentGenres: currentGenres});
-    var recos = this.state.allRecommandations.filter(movie => this.hasCommonGenre(movie.genres, currentGenres) && movie.year >= this.state.minYear && movie.votes >= this.state.minVotes);
+  hasAllThemes(themes, currentThemes){
+    if(currentThemes.length == 0)
+      return true
+    return currentThemes.filter(theme => themes.includes(theme)).length == currentThemes.length;
+  }
+
+  handleThemeAdd(currentThemes){
+    this.setState({currentThemes: currentThemes});
+  }
+
+  handleGenreAdd(currentGenres){
+    this.setState({currentGenres: currentGenres});
+  }
+
+  filterRecommandation(){
+    var recos = this.state.allRecommandations.filter(movie => this.hasCommonGenre(movie.genres, this.state.currentGenres) && movie.year >= this.state.minYear && movie.votes >= this.state.minVotes && this.hasAllThemes(movie.themes, this.state.currentThemes));
     return recos.slice(0, 25);                                            
   }
 
@@ -71,7 +87,7 @@ class Ip extends Component {
 
     const movies = [];
 
-    this.filterRecommandation(this.state.currentGenres).forEach(movie => {
+    this.filterRecommandation(this.state.currentGenres, this.state.currentThemes).forEach(movie => {
       movies.push(<MovieRow id={movie.id} imgUrl={movie.cover_url} title={movie.title} tagline={movie.tagline} year={movie.year}/>);
     });
 
@@ -118,7 +134,7 @@ class Ip extends Component {
                 </ToggleButtonGroup>
               </div>
               <div class="col-md-5 genre-picker">
-                  <GenrePicker ref={this.genrePicker} updateFunction={this.filterRecommandation}/>
+                  <GenrePicker ref={this.genrePicker} updateFunction={this.handleGenreAdd}/>
               </div>
               <div class="col-md-5">
                   <Typography id="discrete-slider" gutterBottom>
@@ -155,11 +171,7 @@ class Ip extends Component {
           </div>
           <div class="row align-items-center my-5">
             <div class="col-lg-12">
-            <div class="row tags-container">
-                <div class="col-md-5">
-                  {tags}
-                </div>
-            </div>
+            <ThemesPicker recommendedTags={this.state.tags} updateFunction={this.handleThemeAdd} />
             <div class="table-responsive">
               <table class="table table-hover">
                 <tbody>

@@ -37,7 +37,6 @@ class GenrePicker extends Component {
     }
 
     handleAddition(tag) {
-        console.log(this.state.tags.map(x => x.id));
         this.setState(state => ({ tags: [...state.tags, tag] }),
         () => this.props.updateFunction(this.state.tags.map(x => x.id)));
     }

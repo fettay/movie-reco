@@ -31,20 +31,23 @@ def add_best_similar_data():
 
 
 def _add_imdb_field(args):
-    id_, field_imdb_name, field_db_name = args
-    collection = get_collection()
-    ia = IMDb()
-    m = collection.find_one({"_id": id_})
-    if not m.get(field_db_name) is None:
-        return
-    m = Movie(**m)
-    field_data = ia.get_movie(m.imdbID).get(field_imdb_name)
-    if field_data is not None:
-        setattr(m, field_db_name, field_data)
-        m.upload_to_mongo(collection)
-        logging.info("Updated movie %s but found data" % m.title)
-    else:
-        logging.info("Updated movie %s and found nothing" % m.title)
+    try:
+        id_, field_imdb_name, field_db_name = args
+        collection = get_collection()
+        ia = IMDb()
+        m = collection.find_one({"_id": id_})
+        if not m.get(field_db_name) is None:
+            return
+        m = Movie(**m)
+        field_data = ia.get_movie(m.imdbID).get(field_imdb_name)
+        if field_data is not None:
+            setattr(m, field_db_name, field_data)
+            m.upload_to_mongo(collection)
+            logging.info("Updated movie %s but found data" % m.title)
+        else:
+            logging.info("Updated movie %s and found nothing" % m.title)
+    except Exception:
+        pass
 
 
 def add_imdb_field(field_imdb_name, field_db_name):
