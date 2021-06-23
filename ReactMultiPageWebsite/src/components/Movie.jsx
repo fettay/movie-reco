@@ -21,7 +21,7 @@ class Movie extends Component {
   }
   
   componentDidMount(){
-    axios.get(process.env.REACT_APP_API + "autocomplete")
+    axios.get(process.env.REACT_APP_API + "autocomplete/")
       .then(res => {
         this.setState({ autocompleteInput: res.data.results });
       })

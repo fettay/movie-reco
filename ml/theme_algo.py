@@ -38,7 +38,7 @@ class RfModel(ComparableModel):
     def predict_themes(self, ip: str):
         theme_probas = self.predict_probas_from_ip(ip)
         theme_predictions = [int(p>0.5) for p in theme_probas]
-        themes_predictions = [theme for (i, theme) in zip(range(len(self.trees)), self.trees) \
+        theme_predictions = [theme for (i, theme) in zip(range(len(self.trees)), self.trees) \
             if theme_predictions[i]==1]
         return theme_predictions
 
@@ -58,14 +58,14 @@ class RfModel(ComparableModel):
     def query_movie(self, movie_str: str, n_reco: int=25):
         movie = movie_from_title(movie_str)
 
-        if not hasattr(movie, 'plot'):
+        if not hasattr(movie, 'plot_outline'):
             return None
         
-        ip = movie.plot
+        ip = movie.plot_outline
 
         if ip is None or len(ip) == 0:
             return None
         
-        return self.recommand_from_ip(ip[0], n_reco)
+        return self.recommand_from_ip(ip, n_reco)
 
 

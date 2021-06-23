@@ -28,12 +28,8 @@ recommanders['Mix'] = MixModel(recommanders['TfIdf'], recommanders['TreeDecision
 themes_recommander = ThemeRecommander(**THEMES_DATA)
 
 
-@app.route('/autocomplete')
-def get_completion_all():
-    titles = most_popular_titles()
-    return jsonify({'results': titles})
-
-
+#@app.route('/autocomplete')
+@app.route('/autocomplete/', defaults={'text': None})
 @app.route('/autocomplete/<string:text>')
 def get_completion(text):
     if text:
@@ -56,11 +52,10 @@ def format_movies(movies):
 
 @app.route('/movie/<string:recommander_name>/<string:movie>')
 def get_movie_reco(recommander_name, movie):
-    movies = recommanders[recommander_name].query_movie(movie, 500)
-    current_movie = movie_from_title(movie)
-    return jsonify({'results': format_movies(movies), 
-                    'summary': current_movie.plot[0],
-                    'tags': current_movie.best_similar_themes})
+    movies = recommanders[recommander_name].recommand_from_movie(movie, 500)
+    ip = movie_from_title(movie).get('plot_outline', '')
+    return jsonify({'results': format_movies(movies),
+                    'movie_ip': ip})
 
 
 @app.route('/ip/<string:recommander_name>', methods=['POST'])
@@ -73,9 +68,9 @@ def get_ip_reco(recommander_name):
 
 
 @app.route('/themes', methods=['POST'])
-def get_themes_reco():
+def get_themes_reco(recommander_name):
     ip = request.json.get("ip")
-    themes = themes_recommander.get_themes(ip)
+    themes = recommanders[recommander_name].predict_themes(ip)
     return jsonify({'results': themes})
 
 

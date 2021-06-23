@@ -32,24 +32,10 @@ class MixModel(ComparableModel):
 
 
     def predict_themes(self, ip: str):
-        return self.theme_model.predict_probas_from_ip(ip)
+        return self.theme_model.predict_themes(ip)
 
 
     @staticmethod
     def IoU(themes1, themes2):
         s1, s2 = set(themes1), set(themes2)
         return len(s1&s2) / len(s1|s2)
-
-
-    def query_movie(self, movie_str: str, n_reco: int=25):
-        movie = movie_from_title(movie_str)
-
-        if not hasattr(movie, 'plot'):
-            return None
-        
-        ip = movie.plot
-
-        if ip is None or len(ip) == 0:
-            return None
-        
-        return self.recommand_from_ip(ip[0], n_reco)

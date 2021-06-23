@@ -10,9 +10,6 @@ import GenrePicker from "./GenrePicker";
 import MovieRow from "./MovieRow";
 
 
-const allThemes = ["abortion", "accident", "africanamerican", "afterlife", "againsttherules", "agedifference", "agent", "aging", "airdisaster", "airplane", "airport", "alcohol", "alien", "alternatereality", "ambition", "angel", "anger", "animal", "apocalypse", "archaeologist", "army", "arrangedmarriage", "arrest", "art", "artist", "assassination", "astronaut", "attack", "audition", "baby", "ballet", "bandit", "bar", "baseball", "basketball", "battle", "beach", "beast", "beating", "bestfriend", "bet", "betrayal", "bird", "birthday", "bisexual", "blackmail", "blood", "boat", "bodyguard", "bollywood", "bomb", "bondage", "bountyhunter", "boxing", "breakup", "brother", "business", "camp", "campaign", "cannibalism", "car", "career", "castle", "cat", "cave", "cellphone", "cemetery", "championship", "chaos", "chase", "cheating", "chess", "child", "christmas", "church", "city", "civilwar", "clown", "cocaine", "coldwar", "coma", "communism", "competition", "computer", "concert", "confession", "cooking", "corruption", "couple", "courage", "cowboy", "crime", "criminal", "curse", "custody", "dance", "danger", "dating", "death", "debt", "deception", "depression", "desert", "desire", "desperation", "destiny", "destruction", "devil", "diary", "diner", "disability", "disappearance", "disguise", "dishonesty", "disorder", "distopia", "doctor", "dog", "doll", "domesticviolence", "downfall", "dragon", "dream", "drowning", "drug", "earthquake", "elevator", "escape", "experiment", "exploitation", "factory", "faith", "fallinlove", "falseaccusation", "fame", "family", "farm", "fascism", "fashion", "father", "fear", "fight", "fire", "firstlove", "fish", "football", "forbiddenlove", "forest", "freedom", "friend", "gambling", "game", "gangster", "gender", "generationgap", "gettinghome", "ghetto", "ghost", "giant", "god", "gold", "goodversusevil", "governmentagency", "grief", "guilt", "hacker", "halloween", "hallucination", "hanging", "hauntedbythepast", "helicopter", "hero", "hiddenidentity", "highsociety", "hiphop", "hippie", "hollywood", "homeinvasion", "homeless", "homosexual", "hope", "horse", "hospital", "hostage", "hotel", "housewife", "humiliation", "hunting", "hypnosis", "illness", "imagination", "immortality", "impossiblelove", "incest", "injury", "injustice", "insanity", "intelligence", "interracialrelations", "interview", "invasion", "inventionsanddiscoveries", "investigation", "island", "isolation", "jazz", "jealousy", "jewish", "journalism", "judge", "justice", "juveniledelinquency", "kidnapping", "killer", "king", "kitchen", "knight", "lake", "lawyer", "leadership", "legendsandmyths", "lie", "lifestylechange", "loneliness", "lossofvirginity", "love", "loveinterest", "loyalty", "lust", "machismo", "mafia", "magic", "manhunt", "manipulation", "martialarts", "massacre", "masterandservant", "masturbation", "medieval", "medium", "memory", "mentalillness", "mentalinstitution", "mentor", "military", "mindcontrol", "mindgame", "miracle", "mirror", "misfit", "mission", "mistakenidentity", "mistress", "money", "monkey", "monster", "moon", "moraldilemma", "mother", "motherdaughterrelationship", "mothersonrelationship", "motorcycle", "mountain", "murder", "murderer", "music", "muslim", "mutant", "muteordeaf", "mystery", "nanny", "nature", "nightclub", "nightmare", "ninja", "obsession", "office", "oldman", "ontheroad", "outerspace", "painting", "parallelworld", "paranoia", "parody", "party", "passion", "philosophy", "photograph", "physicalappearance", "poker", "police", "politics", "poverty", "pregnancy", "princess", "prison", "privatedetective", "profanity", "promise", "prostitute", "psychology", "punishment", "puppet", "rage", "rape", "rebellion", "redemption", "rehabilitation", "relationship", "religion", "rescue", "resistance", "restaurant", "revenge", "rivalry", "robot", "sacrifice", "salesman", "school", "science", "sea", "secret", "securityguard", "sex", "sexism", "shark", "sheriff", "ship", "showbiz", "siblingrelationship", "singlemother", "slavery", "smuggling", "snake", "sniper", "soccer", "socialdifferences", "society", "soldier", "specialagents", "spy", "stabbing", "stalking", "stereotype", "store", "storm", "strangulation", "strongfemalepresence", "suburb", "subway", "success", "suicide", "summer", "supernatural", "superpower", "surrealism", "surveillance", "survival", "suspicion", "swimming", "sword", "talkinganimals", "tattoo", "taxi", "team", "technology", "teenager", "teleportation", "terrorism", "theater", "threat", "timetravel", "torture", "tourist", "tragedy", "tragichero", "transsexual", "travel", "treason", "truck", "twin", "unemployment", "university", "unlikelyfriendships", "unlikelypartners", "vampire", "vengeance", "village", "violence", "virgin", "war", "weapon", "wedding", "widow", "wine", "winter", "witch", "womanizer", "wooing", "workplace", "worldwarone", "worldwartwo", "wrestling", "writer", "younglovers", "youngwoman", "youth", "zombie"];
-
-
 class Ip extends Component {
   constructor (props) {
     super(props);
@@ -32,12 +29,6 @@ class Ip extends Component {
   }
   
 
-  updateThemes(themesBinary){
-    var themes = allThemes.filter((t, i) => themesBinary[i] == 1);
-    this.setState({tags: themes});
-  }
-
-
   getAllRecommandations(){
     // axios.post(process.env.REACT_APP_API + "themes", {ip: this.curContent})
     // .then(res => {
@@ -48,7 +39,7 @@ class Ip extends Component {
     axios.post(process.env.REACT_APP_API + "ip/" + this.recoType, {ip: this.curContent})
     .then(res => {
       this.setState({allRecommandations: res.data.results});
-      this.updateThemes(res.data.themes);
+      this.setState({tags: res.data.themes});
       console.log(res.data.results);
     });
   }
@@ -99,7 +90,7 @@ class Ip extends Component {
             rows={10}
             onChange={(val) => this.curContent = val.target.value}
             variant="outlined"
-            value="A cowboy doll is profoundly threatened and jealous when a new spaceman figure supplants him as top toy in a boy's room."
+            placeholder="A cowboy doll is profoundly threatened and jealous when a new spaceman figure supplants him as top toy in a boy's room."
             />
             <Button className="button-validate" variant="contained" color="primary" onClick={() => this.getAllRecommandations()}>
               Recommend
@@ -112,8 +103,8 @@ class Ip extends Component {
                   exclusive
                   onChange={this.handleTypeChange.bind(this)}
                   aria-label="text alignment">
-                  <ToggleButton value="DL" aria-label="tagline">
-                    DL Model
+                  <ToggleButton value="Mix" aria-label="tagline">
+                    Mix Model
                   </ToggleButton>
                   <ToggleButton value="TfIdf" aria-label="Hel">
                     TfIdf
