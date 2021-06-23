@@ -21,7 +21,7 @@ class GenrePicker extends Component {
         super(props);
 
         this.state = {
-            tags: [{id: "Animation", text: "Animation"}] ,
+            tags: [] ,
             suggestions: genreSuggestions
         };
         this.handleDelete = this.handleDelete.bind(this);

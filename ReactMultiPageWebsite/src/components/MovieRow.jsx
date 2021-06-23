@@ -5,12 +5,11 @@ class MovieRow extends Component {
 
     constructor(props){
         super(props);
-        this.link = "https://www.imdb.com/title/tt" + props.id; 
     }
 
     render() {
         return (
-        <tr class="movie-row clickable-row" onClick={() => window.open(this.link, "_blank")}>
+        <tr class="movie-row clickable-row" onClick={() => window.open("https://www.imdb.com/title/tt" + this.props.id, "_blank")}>
             <td class='movie-row-img'>
                 <img class="img-fluid" src={this.props.imgUrl} alt={this.props.name}/>
             </td>

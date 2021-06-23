@@ -19,7 +19,7 @@ class Ip extends Component {
       allRecommandations: [],
       movieReco: "",
       tags: [],
-      currentGenres: ["Animation"],
+      currentGenres: [],
       minYear: 1950,
       minVotes: 0
     };
@@ -45,6 +45,8 @@ class Ip extends Component {
   }
 
   hasCommonGenre(genres, currentGenres){
+    if(currentGenres.length == 0)
+      return true
     return genres.filter(genre => currentGenres.includes(genre)).length > 0
   }
 
