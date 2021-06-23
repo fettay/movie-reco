@@ -46,7 +46,8 @@ def format_movies(movies):
               'year': movie.get("year", 0),
               'cover_url': movie.get("cover_url", ""),
               'tagline': movie.get("tagline", ""),
-              'id': movie.get("imdbID")}
+              'id': movie.get("imdbID"),
+              'themes': movie.get('predicted_themes', [])}  
               for movie in movies]
 
 
