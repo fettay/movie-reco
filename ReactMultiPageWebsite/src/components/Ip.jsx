@@ -105,8 +105,8 @@ class Ip extends Component {
                 exclusive
                 onChange={this.handleTypeChange.bind(this)}
                 aria-label="text alignment">
-                <ToggleButton value="DL" aria-label="tagline">
-                  DL Model
+                <ToggleButton value="Mix" aria-label="tagline">
+                  Mix Model
                 </ToggleButton>
                 <ToggleButton value="TfIdf" aria-label="Hel">
                   TfIdf

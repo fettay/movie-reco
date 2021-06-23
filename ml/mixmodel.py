@@ -20,13 +20,13 @@ class MixModel(ComparableModel):
         my_movies = movies_from_ids(ids)
         if len(ip_themes) == 0:
             return my_movies
-        iou_scores = array([MixModel.IoU(ip_themes, m['predicted_themes']) for m in my_movies])
+        iou_scores = array([MixModel.IoU(ip_themes, m.get('predicted_themes')) for m in my_movies])
         new_order = argsort(-iou_scores)
-        return my_movies[new_order]
+        return array(my_movies)[new_order]
 
 
     def recommand_from_ip(self, ip: str, n_reco: int=25):
-        recommender_ids = self.tfidf._recommand_to_ids(ip)
+        recommender_ids = self.tfidf._recommand_to_ids(ip, n_reco)
         recommender_movies = self.order_movies_by_iou(ip, recommender_ids)
         return recommender_movies
 
