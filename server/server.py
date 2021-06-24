@@ -63,7 +63,7 @@ def get_movie_reco(recommander_name, movie):
 def get_ip_reco(recommander_name):
     ip = request.json.get("ip")
     movies = recommanders[recommander_name].recommand_from_ip(ip, 500)
-    themes = recommanders[recommander_name].predict_themes(ip)
+    themes = recommanders['TreeDecision'].predict_themes(ip)
     return jsonify({'results': format_movies(movies),
                     'themes': themes})
 
