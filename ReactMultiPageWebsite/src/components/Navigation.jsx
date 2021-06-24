@@ -11,7 +11,7 @@ function Navigation(props) {
           </Link>
           <div>
             <ul class="navbar-nav ml-auto">
-              <li
+              {/* <li
                 class={`nav-item  ${
                   props.location.pathname === "/" ? "active" : ""
                 }`}
@@ -20,8 +20,8 @@ function Navigation(props) {
                   Movies
                   <span class="sr-only">(current)</span>
                 </Link>
-              </li>
-              <li
+              </li> */}
+              {/* <li
                 class={`nav-item  ${
                   props.location.pathname === "/ip" ? "active" : ""
                 }`}
@@ -29,8 +29,8 @@ function Navigation(props) {
                 <Link class="nav-link" to="/ip">
                   IPs
                 </Link>
-              </li>
-              <li
+              </li> */}
+              {/* <li
                 class={`nav-item  ${
                   props.location.pathname === "/map" ? "active" : ""
                 }`}
@@ -38,7 +38,7 @@ function Navigation(props) {
                 <Link class="nav-link" to="/map">
                   Map
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>
