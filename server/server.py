@@ -8,6 +8,7 @@ from ml.themes import ThemeRecommander
 from ml.tfidf import TfIdf, my_tokenizer
 from ml.theme_algo import RfModel
 from ml.mixmodel import MixModel
+from ml.theme_lgbm import ThemePredictor
 from data_management.mongo_utils import movie_from_title, most_popular_titles, get_matching_titles
 from flask import jsonify, request
 from flask_cors import CORS
@@ -15,20 +16,17 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 MODELS_PATH = expanduser("~") + "/research/models/"
+THEME_THRLD = 0.5
 
 THEMES_DATA = {'tokenizer_path': "distilbert-base-uncased",
                "model_path": "models/themes"}
 CORS(app)
 
-recommanders = {#'DL' : SimilarityRecommander("tagline").load(MODELS_PATH + "tagline"),
-                'TfIdf': TfIdf().load(MODELS_PATH + "tfidf/"),
-                'TreeDecision': RfModel().load(MODELS_PATH + "theme_algo/")}
+recommanders = {'TfIdf': TfIdf().load(MODELS_PATH + "tfidf/"),
+                'TreeDecision': ThemePredictor().load(MODELS_PATH + "theme_lgbm/")}
 recommanders['Mix'] = MixModel(recommanders['TfIdf'], recommanders['TreeDecision'])
 
-themes_recommander = ThemeRecommander(**THEMES_DATA)
 
-
-#@app.route('/autocomplete')
 @app.route('/autocomplete/', defaults={'text': None})
 @app.route('/autocomplete/<string:text>')
 def get_completion(text):
@@ -63,7 +61,7 @@ def get_movie_reco(recommander_name, movie):
 def get_ip_reco(recommander_name):
     ip = request.json.get("ip")
     movies = recommanders[recommander_name].recommand_from_ip(ip, 500)
-    themes = recommanders['TreeDecision'].predict_themes(ip)
+    themes = recommanders['TreeDecision'].predict_themes(ip, THEME_THRLD)
     return jsonify({'results': format_movies(movies),
                     'themes': themes})
 
@@ -71,7 +69,7 @@ def get_ip_reco(recommander_name):
 @app.route('/themes', methods=['POST'])
 def get_themes_reco(recommander_name):
     ip = request.json.get("ip")
-    themes = recommanders[recommander_name].predict_themes(ip)
+    themes = recommanders[recommander_name].predict_themes(ip, THEME_THRLD)
     return jsonify({'results': themes})
 
 
